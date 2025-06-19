@@ -1,23 +1,10 @@
 #ifndef WIKISCRAPER_H
 #define WIKISCRAPER_H
 
-#include <cpr/cpr.h>
+#include <QtNetwork>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <iterator>
-#include <iostream>     	// for cout, cin
-#include <fstream>      	// for ifstream
-#include <sstream>      	// for stringstream
-#include <filesystem>   	// making inputting files easier
-#include <vector>
-#include <queue>
-
-using std::cout;            using std::endl;
-using std::ifstream;        using std::stringstream;
-using std::string;          using std::vector;
-using std::priority_queue;  using std::unordered_map;
-using std::unordered_set;   using std::cin;
 
 class WikiScraper {
 
@@ -32,12 +19,27 @@ public:
 
 
 private:
+    QNetworkAccessManager manager;
     std::string getPageSource(const std::string& page_name);
     std::unordered_map<std::string, std::string> page_cache;
     std::unordered_map<std::string, std::unordered_set<std::string>> linkset_cache;
 };
 
-vector<string> findWikiLadder(const string& start_page, const string& end_page);
+
+/* This fix so that we can initalize a QCoreApplication
+ * object to use the async networking facilities for
+ * the WikiScraper.
+ *
+ * In particular, we use a QEventLoop, which needs the existence
+ * of a QCoreApplication instance in the program.
+ */
+#undef main
+#define main main(int argc, char** argv) { \
+                QCoreApplication a(argc, argv); \
+                extern int StudentMain(); \
+                return StudentMain(); \
+            } \
+            int StudentMain
 
 
 #endif // WIKISCRAPER_H
