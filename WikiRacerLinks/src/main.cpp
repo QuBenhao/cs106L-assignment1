@@ -7,6 +7,16 @@
 using std::cout;            using std::endl;
 using std::string;          using std::unordered_set;
 
+string fileToString(std::ifstream& file) {
+    string ret = "";
+    string line;
+    while (std::getline(file, line)) {
+        std::transform(line.begin(), line.end(), line.begin(), tolower);
+        ret += line + " ";
+    }
+    return ret;
+}
+
 /*
  * Note that you have to pass in the file as a single string
  * into the findWikiLinks function!
@@ -15,23 +25,7 @@ using std::string;          using std::unordered_set;
  */
 unordered_set<string> findWikiLinks(const string& page_html) {
     unordered_set<string> links;
-    auto it = page_html.begin();
-    while (it != page_html.end()) {
-        it = std::search(it, page_html.end(), "<a href=\"");
-        if (it == page_html.end()) break; // No more links found
 
-        it += 9; // Move past "<a href=\""
-        auto end_it = std::find(it, page_html.end(), '"'); // Find the closing quote
-        if (end_it != page_html.end()) {
-            string link(it, end_it);
-            if (link.find("/wiki/") == 0 && link.find(":") == string::npos) { // Check if it's a valid wiki link
-                links.insert(link);
-            }
-            it = end_it + 1; // Move past the closing quote
-        } else {
-            break; // No closing quote found, exit loop
-        }
-    }
     return links;
 }
 
@@ -56,7 +50,7 @@ int main() {
         std::cerr << "Error opening file: " << filename << endl;
         return 1;
     }
-    page_html.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    page_html = fileToString(file);
 
     unordered_set<string> validLinks = findWikiLinks(page_html);
 
